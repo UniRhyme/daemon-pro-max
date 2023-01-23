@@ -1,7 +1,7 @@
 // Copyright (C) 2022 MCSManager <mcsmanager-dev@outlook.com>
 
 import { v4 } from "uuid";
-import StorageSubsystem from "../common/system_storage";
+import StorageSubsystem from "../common/storage/file_storage";
 
 function builderPassword() {
   const a = `${v4().replace(/\-/gim, "")}`;
@@ -20,9 +20,11 @@ class Config {
   public maxZipFileSize = 60;
   public language = "en_us";
   public defaultInstancePath = "";
+  public redisUrl = "";
 }
 
 // daemon configuration class
+// PS: config shouldn't be stored in database
 class GlobalConfiguration {
   public config = new Config();
   private static readonly ID = "global";

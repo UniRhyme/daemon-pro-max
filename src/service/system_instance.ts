@@ -3,7 +3,6 @@
 import { $t } from "../i18n";
 import fs from "fs-extra";
 import path from "path";
-import os from "os";
 
 import Instance from "../entity/instance/instance";
 import EventEmitter from "events";
@@ -12,7 +11,7 @@ import logger from "./log";
 
 import { v4 } from "uuid";
 import { Socket } from "socket.io";
-import StorageSubsystem from "../common/system_storage";
+import Storage from "../common/storage/sys_storage";
 import InstanceConfig from "../entity/instance/Instance_config";
 import InstanceStreamListener from "../common/instance_stream";
 import { QueryMapWrapper } from "../common/query_wrapper";
@@ -59,10 +58,10 @@ class InstanceSubsystem extends EventEmitter {
 
   // init all instances from local files
   loadInstances() {
-    const instanceConfigs = StorageSubsystem.list("InstanceConfig");
+    const instanceConfigs = Storage.getStorage().list("InstanceConfig");
     instanceConfigs.forEach((uuid) => {
       try {
-        const instanceConfig = StorageSubsystem.load("InstanceConfig", InstanceConfig, uuid);
+        const instanceConfig = Storage.getStorage().load("InstanceConfig", InstanceConfig, uuid);
         const instance = new Instance(uuid, instanceConfig);
 
         // Fix BUG, reset state
@@ -148,7 +147,7 @@ class InstanceSubsystem extends EventEmitter {
       instance.destroy();
       // destroy record
       this.instances.delete(instanceUuid);
-      StorageSubsystem.delete("InstanceConfig", instanceUuid);
+      Storage.getStorage().delete("InstanceConfig", instanceUuid);
       // delete scheduled task
       InstanceControl.deleteInstanceAllTask(instanceUuid);
       // delete the file asynchronously
@@ -196,7 +195,7 @@ class InstanceSubsystem extends EventEmitter {
         logger.info(`Instance ${instance.config.nickname} (${instance.instanceUuid}) is running or busy, and is being forced to end.`);
         promises.push(
           instance.execCommand(new KillCommand()).then(() => {
-            StorageSubsystem.store("InstanceConfig", instance.instanceUuid, instance.config);
+            Storage.getStorage().store("InstanceConfig", instance.instanceUuid, instance.config);
             logger.info(`Instance ${instance.config.nickname} (${instance.instanceUuid}) saved successfully.`);
           })
         );

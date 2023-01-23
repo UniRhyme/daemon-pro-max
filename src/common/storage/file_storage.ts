@@ -1,14 +1,15 @@
 // Copyright (C) 2022 MCSManager <mcsmanager-dev@outlook.com>
 
-import { $t } from "../i18n";
+import { $t } from "../../i18n";
 import path from "path";
 import fs from "fs-extra";
+import { IStorage } from "./storage_interface";
 
 interface IClassz {
   name: string;
 }
 
-class StorageSubsystem {
+class FileStorageSubsystem implements IStorage {
   public static readonly STIRAGE_DATA_PATH = path.normalize(path.join(process.cwd(), "data"));
   public static readonly STIRAGE_INDEX_PATH = path.normalize(path.join(process.cwd(), "data", "index"));
 
@@ -24,7 +25,7 @@ class StorageSubsystem {
    * Stored in local file based on class definition and identifier
    */
   public store(category: string, uuid: string, object: any) {
-    const dirPath = path.join(StorageSubsystem.STIRAGE_DATA_PATH, category);
+    const dirPath = path.join(FileStorageSubsystem.STIRAGE_DATA_PATH, category);
     if (!fs.existsSync(dirPath)) fs.mkdirsSync(dirPath);
     if (!this.checkFileName(uuid)) throw new Error($t("common.uuidIrregular", { uuid: uuid }));
     const filePath = path.join(dirPath, `${uuid}.json`);
@@ -55,7 +56,7 @@ class StorageSubsystem {
    * Instantiate an object based on the class definition and identifier
    */
   public load(category: string, classz: any, uuid: string) {
-    const dirPath = path.join(StorageSubsystem.STIRAGE_DATA_PATH, category);
+    const dirPath = path.join(FileStorageSubsystem.STIRAGE_DATA_PATH, category);
     if (!fs.existsSync(dirPath)) fs.mkdirsSync(dirPath);
     if (!this.checkFileName(uuid)) throw new Error($t("common.uuidIrregular", { uuid: uuid }));
     const filePath = path.join(dirPath, `${uuid}.json`);
@@ -74,7 +75,7 @@ class StorageSubsystem {
    * Return all identifiers related to this class through the class definition
    */
   public list(category: string) {
-    const dirPath = path.join(StorageSubsystem.STIRAGE_DATA_PATH, category);
+    const dirPath = path.join(FileStorageSubsystem.STIRAGE_DATA_PATH, category);
     if (!fs.existsSync(dirPath)) fs.mkdirsSync(dirPath);
     const files = fs.readdirSync(dirPath);
     const result = new Array<string>();
@@ -88,10 +89,10 @@ class StorageSubsystem {
    * Delete an identifier instance of the specified type through the class definition
    */
   public delete(category: string, uuid: string) {
-    const filePath = path.join(StorageSubsystem.STIRAGE_DATA_PATH, category, `${uuid}.json`);
+    const filePath = path.join(FileStorageSubsystem.STIRAGE_DATA_PATH, category, `${uuid}.json`);
     if (!fs.existsSync(filePath)) return;
     fs.removeSync(filePath);
   }
 }
 
-export default new StorageSubsystem();
+export default new FileStorageSubsystem();

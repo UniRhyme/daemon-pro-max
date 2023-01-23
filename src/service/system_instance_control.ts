@@ -3,7 +3,7 @@
 import { $t } from "../i18n";
 import schedule from "node-schedule";
 import InstanceSubsystem from "./system_instance";
-import StorageSubsystem from "../common/system_storage";
+import Storage from "../common/storage/sys_storage";
 import logger from "./log";
 import StartCommand from "../entity/commands/start";
 import StopCommand from "../entity/commands/stop";
@@ -63,8 +63,8 @@ class InstanceControlSubsystem {
 
   constructor() {
     // Initialize all persistent data and load into memory one by one
-    StorageSubsystem.list("TaskConfig").forEach((uuid) => {
-      const config = StorageSubsystem.load("TaskConfig", TaskConfig, uuid) as TaskConfig;
+    Storage.getStorage().list("TaskConfig").forEach((uuid) => {
+      const config = Storage.getStorage().load("TaskConfig", TaskConfig, uuid) as TaskConfig;
       try {
         this.registerScheduleJob(config, false);
       } catch (error) {
@@ -128,7 +128,7 @@ class InstanceControlSubsystem {
     const newTask = new Task(task, job);
     this.taskMap.get(key).push(newTask);
     if (needStore) {
-      StorageSubsystem.store("TaskConfig", `${key}_${newTask.config.name}`, newTask.config);
+      Storage.getStorage().store("TaskConfig", `${key}_${newTask.config.name}`, newTask.config);
     }
     if (needStore) logger.info($t("system_instance_control.crateSuccess", { name: task.name }));
   }
@@ -202,7 +202,7 @@ class InstanceControlSubsystem {
         arr.splice(index, 1);
       }
     });
-    StorageSubsystem.delete("TaskConfig", `${key}_${name}`);
+    Storage.getStorage().delete("TaskConfig", `${key}_${name}`);
   }
 
   private checkTask(key: string, name: string) {

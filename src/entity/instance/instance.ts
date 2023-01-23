@@ -8,7 +8,7 @@ import { EventEmitter } from "events";
 import { IExecutable } from "./preset";
 import InstanceCommand from "../commands/base/command";
 import InstanceConfig from "./Instance_config";
-import StorageSubsystem from "../../common/system_storage";
+import Storage from "../../common/storage/sys_storage";
 import { LifeCycleTaskManager } from "./life_cycle";
 import { PresetCommandManager } from "./preset";
 import FunctionDispatcher from "../commands/dispatcher";
@@ -153,7 +153,7 @@ export default class Instance extends EventEmitter {
     if (cfg.terminalOption) {
       configureEntityParams(this.config.terminalOption, cfg.terminalOption, "haveColor", Boolean);
     }
-    StorageSubsystem.store("InstanceConfig", this.instanceUuid, this.config);
+    Storage.getStorage().store("InstanceConfig", this.instanceUuid, this.config);
   }
 
   setLock(bool: boolean) {
@@ -212,7 +212,7 @@ export default class Instance extends EventEmitter {
     if (this.instanceStatus != Instance.STATUS_STOP) {
       this.instanceStatus = Instance.STATUS_STOP;
       this.emit("exit", code);
-      StorageSubsystem.store("InstanceConfig", this.instanceUuid, this.config);
+      Storage.getStorage().store("InstanceConfig", this.instanceUuid, this.config);
     }
     // Close all lifecycle tasks
     this.lifeCycleTaskManager.execLifeCycleTask(0);

@@ -9,6 +9,9 @@ import { Server, Socket } from "socket.io";
 import { LOCAL_PRESET_LANG_PATH } from "./const";
 import logger from "./service/log";
 
+import Storage from "./common/storage/sys_storage";
+import RedisStorage from "./common/storage/redis_storage";
+
 initVersionManager();
 const VERSION = getVersion();
 
@@ -26,13 +29,18 @@ _  /_/ // /_/ //  __/  / / / / / /_/ /  / / /
 /_____/ \\__,_/ \\___//_/ /_/ /_/\\____//_/ /_/                                 
                                                                              
 
- + Copyright 2022 MCSManager Dev <https://github.com/MCSManager>
+ + Copyright 2022-2023 MCSManager Dev <https://github.com/MCSManager>
  + Version ${VERSION}
 `);
 
 // Initialize the global configuration service
 globalConfiguration.load();
 const config = globalConfiguration.config;
+if (config.redisUrl.length != 0) {
+  logger.info("RedisUrl detected, switching to Redis...");
+  Storage.setStorageType(1);
+  RedisStorage.initialize(config.redisUrl);
+}
 
 // Set language
 if (fs.existsSync(LOCAL_PRESET_LANG_PATH)) {
@@ -51,6 +59,8 @@ import InstanceSubsystem from "./service/system_instance";
 import { initDependent } from "./service/install";
 import "./service/async_task_service";
 import "./service/async_task_service/quick_install";
+import redis_storage from "./common/storage/redis_storage";
+import sys_storage from "./common/storage/sys_storage";
 
 // Initialize HTTP service
 const koaApp = koa.initKoa();
