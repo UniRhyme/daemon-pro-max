@@ -1,5 +1,4 @@
-// Copyright (C) 2023 Rabbit0w0
-// This file is a part of our private package
+// Copyright (C) 2023 MCSManager <mcsmanager-dev@outlook.com>
 
 import { $t } from "../../i18n";
 import { createClient} from "redis";
@@ -44,15 +43,15 @@ class RedisStorageSubsystem implements IStorage {
   public initialize(url: string) {
     this.client = createClient({ url: url });
     let done = false;
-    console.log("Attempting to connect to redis...");
+    logger.info("Attempting to connect to redis...");
     this.connect().then(() => {done = true});
     deasync.loopWhile(() => {
       return !done;
     })
-    console.log("Connected to redis!");
+    logger.info("Connected to redis!");
   }
 
-  // 保持行为一致
+  // Keep behavior same
   private checkFileName(name: string) {
     const blackList = ["\\", "/", ".."];
     for (const ch of blackList) {
